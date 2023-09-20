@@ -82,6 +82,7 @@ enum EdgeTypeEnum {
     CALL_FT,        // fallthrough after call instruction
     RET,
     NOEDGE,
+    GPU_EXIT,
     _edgetype_end_
 };
 

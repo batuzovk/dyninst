@@ -1059,85 +1059,21 @@ bool insnCodeGen::modifyJcc(Address targetAddr, NS_x86::instruction &insn, codeG
     Address potential;
     signed long disp;
     codeBufIndex_t start = gen.getIndex();
-    GET_PTR(newInsn, gen);
-
-    from += copy_prefixes_nosize_or_segments(origInsn, newInsn, insnType); 
 
 
-    //8-bit jump
-    potential = from + 2;
-    disp = targetAddr - potential;
-    if (is_disp8(disp)) {
-        convert_to_rel8(origInsn, newInsn);
-        append_memory_as_byte(newInsn, disp);
-        SET_PTR(newInsn, gen);
-        return true;
-    }
+    codeBuf_t *newInsn = (codeBuf_t *)(gen).cur_ptr();
 
-    //Can't convert short E0-E3 loops/jumps to 32-bit equivalents
-    if (*origInsn < 0xE0 || *origInsn > 0xE3) {
-        /*
-        //16-bit jump
-        potential = from + 5;
-        disp = targetAddr - potential;
-        if (is_disp16(disp) && gen.fromSpace()->getAddressWidth() != 8) {
-         *newInsn++ = 0x66; //Prefix to shift 32-bit to 16-bit
-         convert_to_rel32(origInsn, newInsn);
-         *((signed short *) newInsn) = (signed short) disp;
-         newInsn += 2;
-         SET_PTR(newInsn, gen);
-         return true;
-         }
-         */
-        //32-bit jump
-        potential = from + 6;
-        disp = targetAddr - potential;
-        if (is_disp32(disp)) {
-            convert_to_rel32(origInsn, newInsn);
-            append_memory_as(newInsn, static_cast<int32_t>(disp));
-            SET_PTR(newInsn, gen);
-            return true;
-        }
-    }
+    printf("from = %lx, targetAddr = %lx bytes = %lx\n",from,targetAddr, * ((uint32_t *) origInsn));
+    uint32_t origInsnContent = *(uint32_t*) origInsn;
+    int32_t diff = (targetAddr - from - 4 )>>2;
+    assert( -32768 <= diff && diff <=  32767);
+    uint32_t newInsnContent = (origInsnContent & 0xffff0000) | (diff & 0xffff);
 
-    // We use a three-step branch system that looks like so:
-    //   jump conditional <A> 
-    // becomes
-    //   jump conditional <B>
-    //   jump <C>
-    //   B: jump <A>
-    //   C: ... next insn
+    append_memory_as(newInsn, static_cast<uint32_t>(newInsnContent));
+    gen.update(newInsn);
 
-    // Moves as appropriate...
-    convert_to_rel8(origInsn, newInsn);
-    // We now want a 2-byte branch past the branch at B
-    append_memory_as_byte(newInsn, 2);
-
-    // Now for the branch to C - <jumpSize> unconditional branch
-    append_memory_as_byte(newInsn, 0xEB);
-    SET_PTR(newInsn, gen);
-    // We now want to 1) move forward a byte (the offset we haven't filled
-    // in yet) and track that we want to fill it in once we're done.
-    codeBufIndex_t jump_to_c_offset_index = gen.getIndex();
-    gen.moveIndex(1);
-    codeBufIndex_t jump_from_index = gen.getIndex();
-
-    // Original address is a little skewed... 
-    // We've moved past the original address (to the tune of nPrefixes + 2 (JCC) + 2 (J))
-    Address currAddr = from + (unsigned) gen.getIndex() - start;
-    insnCodeGen::generateBranch(gen, currAddr, targetAddr);
-    codeBufIndex_t done = gen.getIndex();
-
-    // Go back and generate the branch _around_ the offset we just calculated
-    gen.setIndex(jump_to_c_offset_index);
-    REGET_PTR(newInsn, gen);
-
-    //Go back and fill in the size of the jump at B into the 'jump <C>'
-    // The -1 is because 
-    append_memory_as_byte(newInsn, gen.getDisplacement(jump_from_index, done));
-    SET_PTR(newInsn, gen);
-    gen.setIndex(done);
     return true;
+
 }
 
 bool insnCodeGen::modifyCall(Address targetAddr, NS_x86::instruction &insn, codeGen &gen) {

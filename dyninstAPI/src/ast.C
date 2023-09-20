@@ -2176,7 +2176,7 @@ bool AstSequenceNode::generateCode_phase2(codeGen &gen, bool noCost,
       // Howzat???
       return true;
     }
-
+    relocation_cerr << " In " << __func__ << " sequence . size = " << sequence_.size() << endl;
     for (unsigned i = 0; i < sequence_.size() - 1; i++) {
       if (!sequence_[i]->generateCode_phase2(gen,
                                                noCost,

@@ -132,8 +132,9 @@ emitElf<ElfTypes>::emitElf(Elf_X *oldElfHandle_, bool isStripped_, Object *obj_,
 template<typename ElfTypes>
 bool emitElf<ElfTypes>::cannotRelocatePhdrs()
 {
+    return false;
 //#if defined(bug_phdrs_first_page)
-    return true;
+    //return true;
 //#else
     //  return false;
 //#endif

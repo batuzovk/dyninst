@@ -1212,6 +1212,8 @@ bool mapped_object::parseNewEdges(const std::vector<edgeStub> &stubs)
             InstructionAPI::Instruction cf = insns[stubs[idx].src->last()];
             assert(cf.isValid());
             switch (cf.getCategory()) {
+            case c_GPUKernelExitInsn:
+                edgeType = NOEDGE;
             case c_CallInsn:
                 if (stubs[idx].trg == stubs[idx].src->end())
                 {

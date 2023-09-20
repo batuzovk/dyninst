@@ -293,6 +293,7 @@ bool adhocMovementTransformer::isPCRelData(Widget::Ptr ptr,
       case c_CallInsn:
       case c_BranchInsn:
       case c_ReturnInsn:
+      case c_GPUKernelExitInsn:
           return false;
       default:
 	  break;
