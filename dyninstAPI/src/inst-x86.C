@@ -52,6 +52,7 @@
 #include "dyninstAPI/src/inst-x86.h"
 #include "dyninstAPI/src/baseTramp.h"
 #include "dyninstAPI/src/emit-x86.h"
+#include "dyninstAPI/src/emit-amdgpu.h"
 #include "dyninstAPI/src/instPoint.h" // includes instPoint-x86.h
 
 #include "dyninstAPI/src/addressSpace.h"
@@ -2338,18 +2339,19 @@ Emitter *AddressSpace::getEmitter()
 {
    static EmitterIA32Dyn emitter32Dyn;
    static EmitterIA32Stat emitter32Stat;
-
 #if defined(arch_x86_64)
+
    static EmitterAMD64Dyn emitter64Dyn;
    static EmitterAMD64Stat emitter64Stat;
-
+   static EmitterAMDGPUVega emitterAMDGPUVega;
    if (getAddressWidth() == 8) {
        if (proc()) {
            return &emitter64Dyn;
        }
        else {
            assert(edit());
-           return &emitter64Stat;
+           // return &emitter64Stat;
+           return &emitterAMDGPUVega;
        }
    }
 #endif

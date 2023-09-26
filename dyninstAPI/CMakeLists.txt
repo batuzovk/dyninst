@@ -216,6 +216,9 @@ if(DYNINST_ARCH_i386 OR DYNINST_ARCH_x86_64)
     src/RegisterConversion-x86.C
     src/Relocation/Widgets/CFWidget-x86.C
     src/Relocation/Widgets/PCWidget-x86.C
+
+    src/emit-amdgpu.cpp # for amdgpu codegen on amd64
+
     src/inst-x86.C
     src/emit-x86.C
     src/codegen-x86.C
