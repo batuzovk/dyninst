@@ -54,25 +54,25 @@ uint32_t getMaskSop2(SOP2_ContentKind k) {
   }
 }
 
-void setEncodingSop2(uint32_t rawInst) {
+void setEncodingSop2(uint32_t &rawInst) {
   uint32_t mask = getMaskSop2(SOP2_ContentKind::Encoding);
   rawInst = (rawInst & ~mask) | (2 & mask);
 }
 
-void setOpcodeSop2(uint32_t value, uint32_t rawInst) {
+void setOpcodeSop2(uint32_t value, uint32_t &rawInst) {
   uint32_t mask = getMaskSop2(SOP2_ContentKind::Opcode);
   rawInst = (rawInst & ~mask) | (value & mask);
 }
 
-void setDstSop2(uint32_t value, uint32_t rawInst) {
+void setDstSop2(uint32_t value, uint32_t &rawInst) {
   uint32_t mask = getMaskSop2(SOP2_ContentKind::Dst);
   rawInst = (rawInst & ~mask) | (value & mask);
 }
-void setSrc1Sop2(uint32_t value, uint32_t rawInst) {
+void setSrc1Sop2(uint32_t value, uint32_t &rawInst) {
   uint32_t mask = getMaskSop2(SOP2_ContentKind::Src1);
   rawInst = (rawInst & ~mask) | (value & mask);
 }
-void setSrc0Sop2(uint32_t value, uint32_t rawInst) {
+void setSrc0Sop2(uint32_t value, uint32_t &rawInst) {
   uint32_t mask = getMaskSop2(SOP2_ContentKind::Src0);
   rawInst = (rawInst & ~mask) | (value & mask);
 }

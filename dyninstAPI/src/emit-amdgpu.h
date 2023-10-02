@@ -176,11 +176,11 @@ enum SOP2_Opcode {
 enum SOP2_ContentKind { Encoding, Opcode, Dst, Src1, Src0 };
 
 uint32_t getMaskSop2(SOP2_ContentKind k);
-void setEncodingSop2(uint32_t rawInst);
-void setOpcodeSop2(uint32_t value, uint32_t rawInst);
-void setDstSop2(uint32_t value, uint32_t rawInst);
-void setSrc1Sop2(uint32_t value, uint32_t rawInst);
-void setSrc0Sop2(uint32_t value, uint32_t rawInst);
+void setEncodingSop2(uint32_t &rawInst);
+void setOpcodeSop2(uint32_t value, uint32_t &rawInst);
+void setDstSop2(uint32_t value, uint32_t &rawInst);
+void setSrc1Sop2(uint32_t value, uint32_t &rawInst);
+void setSrc0Sop2(uint32_t value, uint32_t &rawInst);
 
 void emitSop2(SOP2_Opcode opcode, Register dest, Register src1, Register src0,
               codeGen &gen);
