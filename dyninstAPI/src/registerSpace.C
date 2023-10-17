@@ -249,7 +249,9 @@ void registerSpace::createRegSpaceInt(std::vector<registerSlot *> &registers,
         rs->registersByName[registers[i]->name] = registers[i]->number;
 
         switch (registers[i]->type) {
-        case registerSlot::GPR: {
+        case registerSlot::GPR:
+        case registerSlot::SGPR:
+        case registerSlot::VGPR:{
 	  bool physical = true;
 #if defined(arch_x86) || defined(arch_x86_64)
 	  if (rs->addr_width == 4)
