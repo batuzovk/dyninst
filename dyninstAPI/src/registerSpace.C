@@ -1499,7 +1499,9 @@ bool registerSpace::checkLive(Register reg, const bitArray &liveRegs){
 #endif
 	}
 	else {
-		range = regToMachReg64.equal_range(reg);
+	  // For AMDGPU, we have 32-bit registers, and hence we defined regToMachReg32 in RegisterConversion-amdgpu-vega.C
+		range = regToMachReg32.equal_range(reg);
+		// range = regToMachReg64.equal_range(reg);
 		live = &live2;
 	}
 	if (range.first == range.second) assert(0);

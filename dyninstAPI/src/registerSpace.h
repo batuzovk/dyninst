@@ -869,7 +869,9 @@ class registerSpace {
        vgpr252,
        vgpr253,
        vgpr254,
-       vgpr255
+       vgpr255,
+
+       ignored
      } amdgpuVegaRegister_t;
 
 #endif

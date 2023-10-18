@@ -213,7 +213,8 @@ if(DYNINST_ARCH_i386 OR DYNINST_ARCH_x86_64)
   list(
     APPEND
     _sources
-    src/RegisterConversion-x86.C
+    # src/RegisterConversion-x86.C
+    src/RegisterConversion-amdgpu-vega.C # Use AMDGPU register conversion
     src/Relocation/Widgets/CFWidget-x86.C
     src/Relocation/Widgets/PCWidget-x86.C
 
