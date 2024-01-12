@@ -2475,7 +2475,13 @@ bool Parser::getSyscallNumber(Function * /*func*/,
     return (val != -1);
 }
 
+boost::recursive_mutex bfl;
+
 bool Parser::set_edge_parsing_status(ParseFrame& frame, Address addr, Block* b) {
+    assert(b->last() == addr && "Before lock");
+    boost::lock_guard<boost::recursive_mutex> g(bfl);
+    assert(b->last() == addr && "After lock");
+
     Function *f = frame.func;
     parsing_printf("Function %s tries to set parsing edge at %lx\n", frame.func->name().c_str(), addr);
     region_data::edge_data_map * edm = _parse_data->get_edge_data_map(b->region());
