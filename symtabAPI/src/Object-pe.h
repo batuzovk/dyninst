@@ -32,6 +32,7 @@
 #define _Object_pe_h_
 
 #include "symtabAPI/src/Object.h"
+#include <pe-parse/parse.h>
 
 namespace Dyninst {
 namespace SymtabAPI {
@@ -64,6 +65,14 @@ private:
     const ObjectPE& operator=(const ObjectPE &);
 
     void log_error(const std::string &);
+    void parse_object();
+
+    static Region::perm_t getRegionPerms(std::uint32_t flags);
+    static Region::RegionType getRegionType(std::uint32_t flags);
+
+    int getArchWidth() const;
+
+    peparse::parsed_pe *parsed_pe_;
 
     Offset entryAddress_;
 
