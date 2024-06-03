@@ -28,86 +28,50 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-//Hashing function for std::unordered_mapes
+#if !defined(_Object_pe_h_)
+#define _Object_pe_h_
 
-#if !defined(_symtab_util_h_)
-#define _symtab_util_h_
+#include "symtabAPI/src/Object.h"
 
-#include "dyntypes.h"
-#include "dyninst_visibility.h"
-#include <string>
+namespace Dyninst {
+namespace SymtabAPI {
 
-#if defined(_MSC_VER)	
-#include <set>
-#else
-#include <regex.h>
-#include <string>
-#endif
+class ObjectPE : public Object {
+    friend class Symtab;
 
-namespace Dyninst{
-namespace SymtabAPI{
+public:
+    ObjectPE(MappedFile *, bool, void(*)(const char *) = log_msg, bool = true, Symtab * = NULL);
 
+    Offset getPreferedBase() const;
+    void getDependencies(std::vector<std::string> &deps);
+    Offset getEntryAddress() const;
+    Offset getBaseAddress() const;
+    Offset getLoadAddress() const;
+    ObjectType objType() const;
 
-typedef enum {
-    mangledName = 1,
-    prettyName = 2,
-    typedName = 4,
-    anyName = 7 } NameType;
+    DYNINST_EXPORT bool isOnlyExecutable() const;
+    DYNINST_EXPORT bool isExecutable() const;
+    DYNINST_EXPORT bool isSharedLibrary() const;
+    DYNINST_EXPORT bool isOnlySharedLibrary() const;
+    DYNINST_EXPORT Dyninst::Architecture getArch() const;
 
-typedef enum { 
-   lang_Unknown,
-   lang_Assembly,
-   lang_C,
-   lang_CPlusPlus,
-   lang_GnuCPlusPlus,
-   lang_Fortran,
-   lang_CMFortran
-} supportedLanguages;
+    void insertPrereqLibrary(std::string) {} // TODO
+    bool emitDriver(std::string, std::set<Symbol *> &, unsigned ) { return false; } // TODO
+    void getModuleLanguageInfo(dyn_hash_map<std::string, supportedLanguages> *) {} // TODO
 
-DYNINST_EXPORT const char *supportedLanguages2Str(supportedLanguages s);
+private:
+    ObjectPE(const ObjectPE &);
+    const ObjectPE& operator=(const ObjectPE &);
 
-typedef enum {
-   obj_Unknown,
-   obj_SharedLib,
-   obj_Executable,
-   obj_RelocatableFile,
-   obj_PEExecutable,
-   obj_PESharedLib
-} ObjectType;
+    void log_error(const std::string &);
 
-typedef enum { 
-   Obj_Parsing = 0,
-   Syms_To_Functions,
-   Build_Function_Lists,
-   No_Such_Function,
-   No_Such_Variable,
-   No_Such_Module,
-   No_Such_Region,
-   No_Such_Symbol,
-   No_Such_Member,
-   Not_A_File,
-   Not_An_Archive,
-   Duplicate_Symbol,
-   Export_Error,
-   Emit_Error,
-   Invalid_Flags,
-   Bad_Frame_Data,      /* 15 */
-   No_Frame_Entry,
-   Frame_Read_Error,
-   Multiple_Region_Matches,
-   No_Error
-} SymtabError;
+    Offset entryAddress_;
 
-typedef struct{
-    void *data;
-    Offset loadaddr;
-    unsigned long size;
-    std::string name; 
-    unsigned segFlags;
-}Segment;
+    Offset preferedBase_;
+    Offset loadAddress_;
+};
 
-}//namespace SymtabAPI
-}//namespace Dyninst
+} // namespace SymtabAPI
+} // namespace Dyninst
 
-
-#endif
+#endif /* !defined(_Object_pe_h_) */
