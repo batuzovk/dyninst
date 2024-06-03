@@ -183,6 +183,21 @@ public:
     virtual void parseFileLineInfo() { }
     virtual void parseTypeInfo() { }
 
+    Region *findEnclosingRegion(const Offset off)
+    {
+      auto rgn = std::lower_bound(regions_.begin(), regions_.end(), off,
+          [](const Region *r, const Offset &value)
+          {
+            return r->getMemOffset() <= value;
+          });
+      if (rgn != regions_.begin()) {
+        rgn--;
+      } else {
+        rgn = regions_.end();
+      }
+      return rgn != regions_.end() ? *rgn : NULL;
+    }
+
     Dyninst::DwarfDyninst::DwarfHandle::ptr dwarf;
 
     // Only implemented for ELF right now
