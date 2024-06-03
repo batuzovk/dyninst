@@ -310,6 +310,8 @@ Object *Dyninst::SymtabAPI::parseObjectFile(MappedFile *mf,
     const char *mfa = (const char *)mf->base_addr();
     if (mfa[1] == 'E' && mfa[2] == 'L' && mfa[3] == 'F') {
         return new ObjectELF(mf, is_defensive, err, alloc_syms, symtab);
+    } else if (mfa[0] == 'M' && mfa[1] == 'Z') {
+        return new ObjectPE(mf, is_defensive, err, alloc_syms, symtab);
     } else {
         return NULL;
     }

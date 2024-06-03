@@ -262,6 +262,7 @@ private:
 
 #if defined(os_linux) || defined(os_freebsd)
 #include "Object-elf.h"
+#include "Object-pe.h"
 #elif defined(os_windows)
 #include "Object-nt.h"
 #else
