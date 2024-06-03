@@ -60,6 +60,21 @@ public:
     bool emitDriver(std::string, std::set<Symbol *> &, unsigned ) { return false; } // TODO
     void getModuleLanguageInfo(dyn_hash_map<std::string, supportedLanguages> *) {} // TODO
 
+    Region *findEnclosingRegion(const Offset off)
+    {
+      auto rgn = std::lower_bound(regions_.begin(), regions_.end(), off,
+          [](const Region *r, const Offset &value)
+          {
+            return r->getMemOffset() <= value;
+          });
+      if (rgn != regions_.begin()) {
+        rgn--;
+      } else {
+        rgn = regions_.end();
+      }
+      return rgn != regions_.end() ? *rgn : NULL;
+    }
+
 private:
     ObjectPE(const ObjectPE &);
     const ObjectPE& operator=(const ObjectPE &);
