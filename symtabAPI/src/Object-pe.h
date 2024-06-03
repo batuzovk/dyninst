@@ -70,6 +70,8 @@ private:
     static Region::perm_t getRegionPerms(std::uint32_t flags);
     static Region::RegionType getRegionType(std::uint32_t flags);
 
+    static Offset readRelocTarget(const void *ptr, peparse::reloc_type type);
+
     int getArchWidth() const;
 
     peparse::parsed_pe *parsed_pe_;
