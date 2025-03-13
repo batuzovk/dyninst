@@ -41,7 +41,7 @@ class ObjectPE : public Object {
     friend class Symtab;
 
 public:
-    ObjectPE(MappedFile *, bool, void(*)(const char *) = log_msg, bool = true, Symtab * = NULL);
+    ObjectPE(MappedFile *, bool, void(*)(const char *) = log_msg, bool = true, Symtab * = NULL, bool isCOFF = false);
 
     Offset getPreferedBase() const;
     void getDependencies(std::vector<std::string> &deps);
@@ -55,6 +55,7 @@ public:
     DYNINST_EXPORT bool isSharedLibrary() const;
     DYNINST_EXPORT bool isOnlySharedLibrary() const;
     DYNINST_EXPORT Dyninst::Architecture getArch() const;
+    DYNINST_EXPORT bool isCOFF() const { return isCOFF_; }
 
     void insertPrereqLibrary(std::string) {} // TODO
     bool emitDriver(std::string, std::set<Symbol *> &, unsigned ) { return false; } // TODO
@@ -74,6 +75,8 @@ public:
       }
       return rgn != regions_.end() ? *rgn : NULL;
     }
+
+    static bool isCOFF(const char *buf);
 
 private:
     ObjectPE(const ObjectPE &);
@@ -98,6 +101,8 @@ private:
 
     Offset preferedBase_;
     Offset loadAddress_;
+
+    bool isCOFF_;
 };
 
 } // namespace SymtabAPI

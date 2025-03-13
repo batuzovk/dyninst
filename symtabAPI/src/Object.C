@@ -312,6 +312,8 @@ Object *Dyninst::SymtabAPI::parseObjectFile(MappedFile *mf,
         return new ObjectELF(mf, is_defensive, err, alloc_syms, symtab);
     } else if (mfa[0] == 'M' && mfa[1] == 'Z') {
         return new ObjectPE(mf, is_defensive, err, alloc_syms, symtab);
+    } else if (ObjectPE::isCOFF(mfa)) {
+        return new ObjectPE(mf, is_defensive, err, alloc_syms, symtab, true);
     } else {
         return NULL;
     }

@@ -75,12 +75,18 @@ ObjectPE::ObjectPE(MappedFile *mf_,
                    bool defensive,
                    void (*err_func)(const char *),
                    bool alloc_syms,
-                   Symtab *st) :
-    Object(mf_, err_func, st)
+                   Symtab *st,
+                   bool isCOFF) :
+    Object(mf_, err_func, st),
+    isCOFF_(isCOFF)
 {
     (void)defensive;
     (void)alloc_syms;
-    parsed_pe_ = peparse::ParsePEFromPointer((unsigned char *)mf_->base_addr(), mf_->size());
+    if (isCOFF) {
+        parsed_pe_ = peparse::ParseCOFFFromPointer((unsigned char *)mf_->base_addr(), mf_->size());
+    } else {
+        parsed_pe_ = peparse::ParsePEFromPointer((unsigned char *)mf_->base_addr(), mf_->size());
+    }
     if (!parsed_pe_) {
         has_error = true;
         log_error("Error while parsing PE file");
@@ -137,18 +143,10 @@ void ObjectPE::parse_object()
             obj->regions_.push_back(new Region(reg_num, name, header.PointerToRawData,
                                     header.SizeOfRawData, obj->loadAddress_ + header.VirtualAddress, sec_len,
                                     sec_ptr, getRegionPerms(header.Characteristics),
-                                    getRegionType(header.Characteristics)));
+                                    getRegionType(header.Characteristics), obj->isCOFF()));
             return 0;
         };
     peparse::IterSec(parsed_pe_, section_iterator, this);
-
-    struct region_less {
-        bool operator()(const Region *r1, const Region *r2)
-        {
-            return r1->memOff_ < r2->memOff_;
-        }
-    } cmp;
-    std::sort(regions_.begin(), regions_.end(), cmp);
 
     /* Iterate over symbols */
 
@@ -217,6 +215,28 @@ void ObjectPE::parse_object()
             return 0;
         };
     peparse::IterSymbols(parsed_pe_, symbol_iterator, this);
+
+    /* Iterate over relocations */
+    peparse::iterCOFFReloc coff_relocation_iterator =
+        [](void *N, const peparse::VA &ra, const uint32_t &sec_num, const uint32_t &sym_num, const peparse::reloc_type &rel_type) -> int {
+            ObjectPE *obj = static_cast<ObjectPE*>(N);
+            static_cast<void>(sym_num);
+            if (sec_num >= obj->regions_.size()) return 0;
+            Region *sec = obj->regions_[sec_num];
+            const uint8_t *ptr = (const uint8_t *)sec->getPtrToRawData() + ((Offset)ra - (Offset)sec->getMemOffset());
+            Offset ta = ObjectPE::readRelocTarget(ptr, rel_type);
+            sec->addRelocationEntry(relocationEntry(ta, ra, 0, "", NULL, (unsigned long)rel_type, Region::RT_REL));
+            return 0;
+        };
+    peparse::IterCOFFRelocs(parsed_pe_, coff_relocation_iterator, this);
+
+    struct region_less {
+        bool operator()(const Region *r1, const Region *r2)
+        {
+            return r1->memOff_ < r2->memOff_;
+        }
+    } cmp;
+    std::sort(regions_.begin(), regions_.end(), cmp);
 
     peparse::iterExp export_iterator =
         [](void *N, const peparse::VA &addr, const std::string &,
@@ -444,4 +464,16 @@ void ObjectPE::rebase(Offset new_base)
     }
     entryAddress_ += delta;
     loadAddress_ = new_base;
+}
+
+bool ObjectPE::isCOFF(const char *buf)
+{
+    unsigned short machine_type = *((const unsigned short *)buf);
+    switch (machine_type) {
+        case peparse::IMAGE_FILE_MACHINE_AMD64:
+        case peparse::IMAGE_FILE_MACHINE_I386:
+            return true;
+        default:
+            return false;
+    }
 }
